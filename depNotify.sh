@@ -1,4 +1,7 @@
 #!/bin/bash
+
+# This is a fork of the DEPNotify-Starter script from Jamf, including a few tricks to enhance the GUI.
+
 # Version 2.0.5
 
 #########################################################################################
@@ -92,6 +95,11 @@
   # Options if not using dropdown alert box
     COMPLETE_MAIN_TEXT='Your Mac is now finished with initial setup and configuration.'
     COMPLETE_BUTTON_TEXT="Get Started!"
+    
+ # Picture folder Path
+ # This folder will contain pictures that will be displayed while going through the instalalation steps.
+ # Pictures should be 800x200, at 144 dpi. 
+ PICS_FOLDER=/usr/local/depnotify/pictures
 
 #########################################################################################
 # Plist Configuration
@@ -149,18 +157,19 @@ TRIGGER="event"
 #########################################################################################
 # Policy Variable to Modify
 #########################################################################################
-# The policy array must be formatted "Progress Bar text,customTrigger". These will be
-# run in order as they appear below.
+# The policy array must be formatted "Progress Bar text,customTrigger, Picture". These will be
+# run in order as they appear below. Pictures should be JPG or PNG and must be deployed first
+# in the PICS_FOLDER first.
   POLICY_ARRAY=(
-    "Installing Adobe Creative Cloud,adobeCC"
-    "Installing Adobe Reader,adobeReader"
-    "Installing Chrome,chrome"
-    "Installing Firefox,firefox"
-    "Installing Zoom,zoom"
-    "Installing NoMAD,nomad"
-    "Installing Office,msOffice"
-    "Installing Webex,webex"
-    "Installing Critical Updates,updateSoftware"
+    "Installing Adobe Creative Cloud,adobeCC,adobecc.png"
+    "Installing Adobe Reader,adobeReader,adobereader.png"
+    "Installing Chrome,chrome,chrome.png"
+    "Installing Firefox,firefox,firefox.png"
+    "Installing Zoom,zoom,zoom.png"
+    "Installing NoMAD,nomad,nomad.png"
+    "Installing Office,msOffice,msoffice.png"
+    "Installing Webex,webex,webex.png"
+    "Installing Critical Updates,updateSoftware,softwareupdates.png"
   )
 
 #########################################################################################
@@ -799,12 +808,16 @@ TRIGGER="event"
   fi
 
 # Loop to run policies
+# This was modified to take into 
   for POLICY in "${POLICY_ARRAY[@]}"; do
+    echo "Command: MainTextImage: "$PICS_FOLDER"/$(echo "$POLICY" | cut -d ',' -f3)" >> "$DEP_NOTIFY_LOG"
+	echo "Command: BannerTitle: $BANNER_TITLE" >> "$DEP_NOTIFY_LOG"
     echo "Status: $(echo "$POLICY" | cut -d ',' -f1)" >> "$DEP_NOTIFY_LOG"
+
     if [ "$TESTING_MODE" = true ]; then
-      sleep 10
+      sleep 3
     elif [ "$TESTING_MODE" = false ]; then
-      "$JAMF_BINARY" policy "-$TRIGGER" "$(echo "$POLICY" | cut -d ',' -f2)"
+      "$JAMF_BINARY" policy -event "$(echo "$POLICY" | cut -d ',' -f2)"
     fi
   done
 
