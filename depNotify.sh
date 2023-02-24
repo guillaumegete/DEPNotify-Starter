@@ -817,7 +817,7 @@ TRIGGER="event"
     if [ "$TESTING_MODE" = true ]; then
       sleep 3
     elif [ "$TESTING_MODE" = false ]; then
-      "$JAMF_BINARY" policy -event "$(echo "$POLICY" | cut -d ',' -f2)"
+      "$JAMF_BINARY" policy -event "$(echo "$POLICY" | cut -d ',' -f2)" -forceNoRecon
     fi
   done
 
@@ -850,5 +850,9 @@ TRIGGER="event"
         echo "Command: ContinueButton: $COMPLETE_BUTTON_TEXT" >> "$DEP_NOTIFY_LOG"
       fi
     fi
+
+# Final Inventory update
+
+"$JAMF_BINARY" recon
 
 exit 0
